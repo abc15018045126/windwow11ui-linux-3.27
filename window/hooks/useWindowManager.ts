@@ -1,11 +1,8 @@
 import {useState, useCallback, useEffect} from 'react';
 import {OpenApp, AppDefinition} from '../types';
-import {
-  TASKBAR_HEIGHT,
-  DEFAULT_WINDOW_WIDTH,
-  DEFAULT_WINDOW_HEIGHT,
-} from '../constants';
+import {TASKBAR_HEIGHT} from '../constants';
 import {getAppDefinitions} from '../../components/apps';
+import * as AppManager from '../app';
 
 export const useWindowManager = (
   desktopRef: React.RefObject<HTMLDivElement>,
@@ -28,6 +25,8 @@ export const useWindowManager = (
     loadApps();
   }, []);
 
+  // This helper function was removed, but is still needed by toggleMaximizeApp.
+  // It is also needed by the app launchers, so we will pass it in the deps object.
   const getNextPosition = (appWidth: number, appHeight: number) => {
     const desktopWidth = desktopRef.current?.clientWidth || window.innerWidth;
     const desktopHeight =
@@ -49,91 +48,29 @@ export const useWindowManager = (
 
   const openApp = useCallback(
     async (appIdentifier: string | AppDefinition, initialData?: any) => {
-      let appDef: AppDefinition | undefined;
-
-      if (typeof appIdentifier === 'string') {
-        appDef = appDefinitions.find(app => app.id === appIdentifier);
-      } else {
-        const potentialAppDef = appIdentifier as any;
-        if (potentialAppDef.path && !potentialAppDef.externalPath) {
-          potentialAppDef.externalPath = potentialAppDef.path;
-        }
-        appDef = potentialAppDef;
-      }
-
-      if (!appDef) {
-        const id =
-          typeof appIdentifier === 'string'
-            ? appIdentifier
-            : JSON.stringify(appIdentifier);
-        console.error(`App with identifier "${id}" not found or invalid.`);
-        return;
-      }
-
-      if (appDef.isExternal && appDef.externalPath) {
-        if (window.electronAPI?.launchExternalApp) {
-          window.electronAPI.launchExternalApp(appDef.externalPath);
-        } else {
-          fetch('http://localhost:3001/api/launch', {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({path: appDef.externalPath}),
-          }).catch(error => {
-            console.error('Failed to launch external app via API:', error);
-            alert(
-              'Failed to launch application. Ensure the backend server is running.',
-            );
-          });
-        }
-        return;
-      }
-
-      if (!appDef.id) {
-        console.error('Cannot open internal app without an ID.', appDef);
-        return;
-      }
-
-      if (!initialData) {
-        const existingAppInstance = openApps.find(
-          app => app.id === appDef!.id && !app.isMinimized,
-        );
-        if (existingAppInstance) {
-          focusApp(existingAppInstance.instanceId);
-          return;
-        }
-        const minimizedInstance = openApps.find(
-          app => app.id === appDef!.id && app.isMinimized,
-        );
-        if (minimizedInstance) {
-          toggleMinimizeApp(minimizedInstance.instanceId);
-          return;
-        }
-      }
-
-      const instanceId = `${appDef.id}-${Date.now()}`;
-      const newZIndex = nextZIndex + 1;
-      setNextZIndex(newZIndex);
-
-      const defaultWidth = appDef.defaultSize?.width || DEFAULT_WINDOW_WIDTH;
-      const defaultHeight = appDef.defaultSize?.height || DEFAULT_WINDOW_HEIGHT;
-
-      const newApp: OpenApp = {
-        ...appDef,
-        icon: appDef.icon,
-        instanceId,
-        zIndex: newZIndex,
-        position: getNextPosition(defaultWidth, defaultHeight),
-        size: {width: defaultWidth, height: defaultHeight},
-        isMinimized: false,
-        isMaximized: false,
-        title: appDef.name,
-        initialData: initialData,
+      const deps = {
+        openApps,
+        setOpenApps,
+        activeAppInstanceId,
+        setActiveAppInstanceId,
+        nextZIndex,
+        setNextZIndex,
+        desktopRef,
+        getNextPosition,
       };
-
-      setOpenApps(currentOpenApps => [...currentOpenApps, newApp]);
-      setActiveAppInstanceId(instanceId);
+      AppManager.openApp(appIdentifier, deps, appDefinitions, initialData);
     },
-    [appDefinitions, nextZIndex],
+    [
+      appDefinitions,
+      nextZIndex,
+      openApps,
+      activeAppInstanceId,
+      desktopRef,
+      getNextPosition,
+      setOpenApps,
+      setActiveAppInstanceId,
+      setNextZIndex,
+    ],
   );
 
   const focusApp = useCallback(
