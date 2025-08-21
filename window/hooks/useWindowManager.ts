@@ -70,97 +70,132 @@ export const useWindowManager = (
     ],
   );
 
-  const focusApp = useCallback((instanceId: string) => {
-    if (activeAppInstanceId === instanceId) return;
+  const focusApp = useCallback(
+    (instanceId: string) => {
+      if (activeAppInstanceId === instanceId) return;
 
-    const newZIndex = nextZIndex + 1;
-    setNextZIndex(newZIndex);
-    setOpenApps(prev =>
-      prev.map(app =>
-        app.instanceId === instanceId ? { ...app, zIndex: newZIndex, isMinimized: false } : app
-      )
-    );
-    setActiveAppInstanceId(instanceId);
-  }, [activeAppInstanceId, nextZIndex]);
+      const newZIndex = nextZIndex + 1;
+      setNextZIndex(newZIndex);
+      setOpenApps(prev =>
+        prev.map(app =>
+          app.instanceId === instanceId
+            ? {...app, zIndex: newZIndex, isMinimized: false}
+            : app,
+        ),
+      );
+      setActiveAppInstanceId(instanceId);
+    },
+    [activeAppInstanceId, nextZIndex],
+  );
 
-  const closeApp = useCallback((instanceId: string) => {
-    setOpenApps(prev => prev.filter(app => app.instanceId !== instanceId));
-    if (activeAppInstanceId === instanceId) {
-      const remainingApps = openApps.filter(app => app.instanceId !== instanceId);
-      const nextActiveApp = remainingApps.length > 0 ? remainingApps[remainingApps.length - 1].instanceId : null;
-      setActiveAppInstanceId(nextActiveApp);
-    }
-  }, [activeAppInstanceId, openApps]);
+  const closeApp = useCallback(
+    (instanceId: string) => {
+      setOpenApps(prev => prev.filter(app => app.instanceId !== instanceId));
+      if (activeAppInstanceId === instanceId) {
+        const remainingApps = openApps.filter(
+          app => app.instanceId !== instanceId,
+        );
+        const nextActiveApp =
+          remainingApps.length > 0
+            ? remainingApps[remainingApps.length - 1].instanceId
+            : null;
+        setActiveAppInstanceId(nextActiveApp);
+      }
+    },
+    [activeAppInstanceId, openApps],
+  );
 
-  const toggleMinimizeApp = useCallback((instanceId: string) => {
-     const app = openApps.find(a => a.instanceId === instanceId);
-     if (!app) return;
+  const toggleMinimizeApp = useCallback(
+    (instanceId: string) => {
+      const app = openApps.find(a => a.instanceId === instanceId);
+      if (!app) return;
 
-     setOpenApps(prev =>
-      prev.map(a => {
-        if (a.instanceId === instanceId) {
-          return { ...a, isMinimized: !a.isMinimized };
-        }
-        return a;
-      })
-    );
-
-    if (app.isMinimized) {
-        focusApp(instanceId);
-    } else if (activeAppInstanceId === instanceId) {
-        setActiveAppInstanceId(null);
-    }
-  }, [openApps, activeAppInstanceId, focusApp]);
-
- const toggleMaximizeApp = useCallback((instanceId: string) => {
-    setOpenApps(prevOpenApps =>
-      prevOpenApps.map(app => {
-        if (app.instanceId === instanceId) {
-          const desktopWidth = desktopRef.current?.clientWidth || window.innerWidth;
-          const desktopHeight = (desktopRef.current?.clientHeight || window.innerHeight) - TASKBAR_HEIGHT;
-
-          if (app.isMaximized) {
-            return {
-              ...app,
-              isMaximized: false,
-              position: app.previousPosition || getNextPosition(app.previousSize?.width || app.size.width, app.previousSize?.height || app.size.height),
-              size: app.previousSize || app.size,
-            };
-          } else {
-            const newZ = nextZIndex + 1;
-            setNextZIndex(newZ);
-            setActiveAppInstanceId(instanceId);
-            return {
-              ...app,
-              isMaximized: true,
-              previousPosition: app.position,
-              previousSize: app.size,
-              position: { x: 0, y: 0 },
-              size: { width: desktopWidth, height: desktopHeight },
-              zIndex: newZ,
-            };
+      setOpenApps(prev =>
+        prev.map(a => {
+          if (a.instanceId === instanceId) {
+            return {...a, isMinimized: !a.isMinimized};
           }
-        }
-        return app;
-      })
-    );
-  }, [nextZIndex]);
+          return a;
+        }),
+      );
 
-  const updateAppPosition = useCallback((instanceId: string, position: { x: number; y: number }) => {
-    setOpenApps(prev =>
-      prev.map(app => (app.instanceId === instanceId ? { ...app, position } : app))
-    );
-  }, []);
+      if (app.isMinimized) {
+        focusApp(instanceId);
+      } else if (activeAppInstanceId === instanceId) {
+        setActiveAppInstanceId(null);
+      }
+    },
+    [openApps, activeAppInstanceId, focusApp],
+  );
 
-  const updateAppSize = useCallback((instanceId: string, size: { width: number; height: number }) => {
-    setOpenApps(prev =>
-      prev.map(app => (app.instanceId === instanceId ? { ...app, size } : app))
-    );
-  }, []);
+  const toggleMaximizeApp = useCallback(
+    (instanceId: string) => {
+      setOpenApps(prevOpenApps =>
+        prevOpenApps.map(app => {
+          if (app.instanceId === instanceId) {
+            const desktopWidth =
+              desktopRef.current?.clientWidth || window.innerWidth;
+            const desktopHeight =
+              (desktopRef.current?.clientHeight || window.innerHeight) -
+              TASKBAR_HEIGHT;
+
+            if (app.isMaximized) {
+              return {
+                ...app,
+                isMaximized: false,
+                position:
+                  app.previousPosition ||
+                  getNextPosition(
+                    app.previousSize?.width || app.size.width,
+                    app.previousSize?.height || app.size.height,
+                  ),
+                size: app.previousSize || app.size,
+              };
+            } else {
+              const newZ = nextZIndex + 1;
+              setNextZIndex(newZ);
+              setActiveAppInstanceId(instanceId);
+              return {
+                ...app,
+                isMaximized: true,
+                previousPosition: app.position,
+                previousSize: app.size,
+                position: {x: 0, y: 0},
+                size: {width: desktopWidth, height: desktopHeight},
+                zIndex: newZ,
+              };
+            }
+          }
+          return app;
+        }),
+      );
+    },
+    [nextZIndex],
+  );
+
+  const updateAppPosition = useCallback(
+    (instanceId: string, position: {x: number; y: number}) => {
+      setOpenApps(prev =>
+        prev.map(app =>
+          app.instanceId === instanceId ? {...app, position} : app,
+        ),
+      );
+    },
+    [],
+  );
+
+  const updateAppSize = useCallback(
+    (instanceId: string, size: {width: number; height: number}) => {
+      setOpenApps(prev =>
+        prev.map(app => (app.instanceId === instanceId ? {...app, size} : app)),
+      );
+    },
+    [],
+  );
 
   const updateAppTitle = useCallback((instanceId: string, title: string) => {
     setOpenApps(prev =>
-      prev.map(app => app.instanceId === instanceId ? { ...app, title } : app)
+      prev.map(app => (app.instanceId === instanceId ? {...app, title} : app)),
     );
   }, []);
 
