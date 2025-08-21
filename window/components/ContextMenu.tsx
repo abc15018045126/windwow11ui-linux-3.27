@@ -1,9 +1,8 @@
+import React, {useEffect, useRef} from 'react';
 
-import React, { useEffect, useRef } from 'react';
-
-export type ContextMenuItem = 
-  | { type: 'item'; label: string; onClick: () => void; disabled?: boolean }
-  | { type: 'separator' };
+export type ContextMenuItem =
+  | {type: 'item'; label: string; onClick: () => void; disabled?: boolean}
+  | {type: 'separator'};
 
 interface ContextMenuProps {
   x: number;
@@ -12,7 +11,7 @@ interface ContextMenuProps {
   onClose: () => void;
 }
 
-const ContextMenu: React.FC<ContextMenuProps> = ({ x, y, items, onClose }) => {
+const ContextMenu: React.FC<ContextMenuProps> = ({x, y, items, onClose}) => {
   const menuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -30,20 +29,21 @@ const ContextMenu: React.FC<ContextMenuProps> = ({ x, y, items, onClose }) => {
   const screenHeight = window.innerHeight;
   const menuWidth = 180; // Estimated width
   const menuHeight = items.length * 32; // Estimated height
-  
+
   const finalX = x + menuWidth > screenWidth ? screenWidth - menuWidth - 5 : x;
-  const finalY = y + menuHeight > screenHeight ? screenHeight - menuHeight - 5 : y;
+  const finalY =
+    y + menuHeight > screenHeight ? screenHeight - menuHeight - 5 : y;
 
   return (
     <div
       ref={menuRef}
-      style={{ top: finalY, left: finalX }}
+      style={{top: finalY, left: finalX}}
       className="fixed bg-black/80 backdrop-blur-xl border border-zinc-700 rounded-md shadow-lg py-1.5 w-48 text-sm text-zinc-100 z-[60] animate-fade-in-fast"
       onClick={e => {
         e.stopPropagation(); // Prevent clicks inside menu from bubbling up to a dismiss handler
         onClose(); // Close on any item click
       }}
-      onContextMenu={(e) => e.preventDefault()} // Prevent native context menu on our custom one
+      onContextMenu={e => e.preventDefault()} // Prevent native context menu on our custom one
     >
       {items.map((item, index) => {
         if (item.type === 'separator') {

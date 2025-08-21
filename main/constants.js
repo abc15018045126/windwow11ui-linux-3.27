@@ -1,4 +1,4 @@
-const { app } = require('electron');
+const {app} = require('electron');
 const path = require('path');
 
 const isDev = !app.isPackaged;
@@ -11,10 +11,10 @@ const FS_ROOT = path.join(__dirname, '..');
 const SFTP_TEMP_DIR = path.join(FS_ROOT, 'sftp_temp');
 
 module.exports = {
-    isDev,
-    API_PORT,
-    WS_PORT,
-    SFTP_WS_PORT,
-    FS_ROOT,
-    SFTP_TEMP_DIR,
+  isDev,
+  API_PORT,
+  WS_PORT,
+  SFTP_WS_PORT,
+  FS_ROOT,
+  SFTP_TEMP_DIR,
 };

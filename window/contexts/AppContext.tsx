@@ -17,4 +17,4 @@ export interface AppContextType {
 }
 
 // Provide a default value for the context
-export const AppContext = React.createContext<AppContextType>({ apps: [] });
+export const AppContext = React.createContext<AppContextType>({apps: []});

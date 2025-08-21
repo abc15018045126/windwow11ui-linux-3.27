@@ -1,13 +1,17 @@
-import React, { useEffect } from 'react';
-import { AppDefinition, AppComponentProps } from '../../window/types';
-import { Browser2Icon } from '../../window/constants';
+import React, {useEffect} from 'react';
+import {AppDefinition, AppComponentProps} from '../../window/types';
+import {Browser2Icon} from '../../window/constants';
 
 // This component is just a placeholder. The app is launched externally.
-const Chrome2App: React.FC<AppComponentProps> = ({ setTitle }) => {
+const Chrome2App: React.FC<AppComponentProps> = ({setTitle}) => {
   useEffect(() => {
     setTitle('Chrome 2');
   }, [setTitle]);
-  return <div className="p-4">Launching Chrome 2... This app will open in a new window.</div>;
+  return (
+    <div className="p-4">
+      Launching Chrome 2... This app will open in a new window.
+    </div>
+  );
 };
 
 export const appDefinition: AppDefinition = {

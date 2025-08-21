@@ -15,17 +15,17 @@ function startServer() {
   app.use(express.static(path.join(__dirname, 'public')));
   app.listen(port, () => console.log(`HTTP 服务器: http://localhost:${port}`));
 
-  wss = new WebSocket.Server({ port: 8081 });
-  console.log("WebSocket 服务器: ws://localhost:8081");
+  wss = new WebSocket.Server({port: 8081});
+  console.log('WebSocket 服务器: ws://localhost:8081');
   global.wss = wss;
 
-  wss.on('connection', (ws) => {
+  wss.on('connection', ws => {
     if (mainWindow) {
       const [w, h] = mainWindow.getSize();
-      ws.send(JSON.stringify({ type: 'size', width: w, height: h }));
+      ws.send(JSON.stringify({type: 'size', width: w, height: h}));
     }
 
-    ws.on('message', (msg) => {
+    ws.on('message', msg => {
       const event = JSON.parse(msg);
       if (event.type === 'input' && mainWindow) {
         mainWindow.webContents.sendInputEvent(event.payload);
@@ -43,4 +43,4 @@ function startServer() {
   });
 }
 
-module.exports = { startServer, setWindow };
+module.exports = {startServer, setWindow};
