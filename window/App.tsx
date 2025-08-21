@@ -1,13 +1,13 @@
-import React, { useState, useCallback, useEffect, useRef } from 'react';
-import { ClipboardItem, FilesystemItem } from './types';
+import React, {useState, useCallback, useEffect, useRef} from 'react';
+import {ClipboardItem, FilesystemItem} from './types';
 import * as FsService from '../services/filesystemService';
 import Taskbar from './components/Taskbar';
 import StartMenu from './components/StartMenu';
 import AppWindow from './components/AppWindow';
 import Desktop from './components/Desktop';
-import { ThemeContext, themes } from './theme';
-import { AppContext } from './contexts/AppContext';
-import { useWindowManager } from './hooks/useWindowManager';
+import {ThemeContext, themes} from './theme';
+import {AppContext} from './contexts/AppContext';
+import {useWindowManager} from './hooks/useWindowManager';
 
 const App: React.FC = () => {
   const desktopRef = useRef<HTMLDivElement>(null);
@@ -30,7 +30,9 @@ const App: React.FC = () => {
   const [clipboard, setClipboard] = useState<ClipboardItem | null>(null);
 
   // --- Theme State ---
-  const [currentThemeId, setCurrentThemeId] = useState<'default' | 'light'>('default');
+  const [currentThemeId, setCurrentThemeId] = useState<'default' | 'light'>(
+    'default',
+  );
   const theme = themes[currentThemeId];
 
   const handleThemeChange = (themeId: 'default' | 'light') => {
@@ -41,33 +43,43 @@ const App: React.FC = () => {
   const [refreshId, setRefreshId] = useState(0);
   const triggerRefresh = () => setRefreshId(id => id + 1);
 
-  const toggleStartMenu = useCallback(() => setIsStartMenuOpen(prev => !prev), []);
+  const toggleStartMenu = useCallback(
+    () => setIsStartMenuOpen(prev => !prev),
+    [],
+  );
 
   // --- Filesystem Operations ---
   const handleCopy = useCallback((item: FilesystemItem) => {
-    setClipboard({ item, operation: 'copy' });
+    setClipboard({item, operation: 'copy'});
   }, []);
   const handleCut = useCallback((item: FilesystemItem) => {
-    setClipboard({ item, operation: 'cut' });
+    setClipboard({item, operation: 'cut'});
   }, []);
-  const handlePaste = useCallback(async (destinationPath: string) => {
-    if (!clipboard) return;
-    const { item, operation } = clipboard;
+  const handlePaste = useCallback(
+    async (destinationPath: string) => {
+      if (!clipboard) return;
+      const {item, operation} = clipboard;
 
-    if (operation === 'copy') {
+      if (operation === 'copy') {
         await FsService.copyItem(item, destinationPath);
-    } else { // cut
+      } else {
+        // cut
         await FsService.moveItem(item, destinationPath);
         setClipboard(null);
-    }
-    triggerRefresh();
-  }, [clipboard]);
+      }
+      triggerRefresh();
+    },
+    [clipboard],
+  );
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (isStartMenuOpen) {
         const target = event.target as HTMLElement;
-        if (!target.closest('.start-menu-container') && !target.closest('.taskbar-start-button')) {
+        if (
+          !target.closest('.start-menu-container') &&
+          !target.closest('.taskbar-start-button')
+        ) {
           setIsStartMenuOpen(false);
         }
       }
@@ -76,14 +88,13 @@ const App: React.FC = () => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [isStartMenuOpen]);
 
-
   return (
-    <AppContext.Provider value={{ apps: appDefinitions }}>
-      <ThemeContext.Provider value={{ theme, setTheme: handleThemeChange }}>
+    <AppContext.Provider value={{apps: appDefinitions}}>
+      <ThemeContext.Provider value={{theme, setTheme: handleThemeChange}}>
         <div
           ref={desktopRef}
           className="h-screen w-screen flex flex-col bg-cover bg-center"
-          style={{ backgroundImage: `url(${theme.wallpaper})` }}
+          style={{backgroundImage: `url(${theme.wallpaper})`}}
         >
           {appsLoading ? (
             <div className="flex-grow flex items-center justify-center text-white">
@@ -93,34 +104,45 @@ const App: React.FC = () => {
             <>
               <div className="flex-grow relative overflow-hidden">
                 <Desktop
-                    openApp={openApp}
-                    clipboard={clipboard}
-                    handleCopy={handleCopy}
-                    handleCut={handleCut}
-                    handlePaste={handlePaste}
-                    key={refreshId} // Force remount on refresh
+                  openApp={openApp}
+                  clipboard={clipboard}
+                  handleCopy={handleCopy}
+                  handleCut={handleCut}
+                  handlePaste={handlePaste}
+                  key={refreshId} // Force remount on refresh
                 />
-                {openApps.filter(app => !app.isMinimized).map(app => (
-                  <AppWindow
-                    key={app.instanceId}
-                    app={{...app, initialData: {...app.initialData, refreshId, triggerRefresh}}}
-                    onClose={() => closeApp(app.instanceId)}
-                    onMinimize={() => toggleMinimizeApp(app.instanceId)}
-                    onMaximize={() => toggleMaximizeApp(app.instanceId)}
-                    onFocus={() => focusApp(app.instanceId)}
-                    onDrag={updateAppPosition}
-                    onResize={updateAppSize}
-                    isActive={app.instanceId === activeAppInstanceId}
-                    desktopRef={desktopRef}
-                    onSetTitle={(newTitle) => updateAppTitle(app.instanceId, newTitle)}
-                    onWallpaperChange={() => {}} // This is now handled by themes app
-                    openApp={openApp}
-                    clipboard={clipboard}
-                    handleCopy={handleCopy}
-                    handleCut={handleCut}
-                    handlePaste={handlePaste}
-                  />
-                ))}
+                {openApps
+                  .filter(app => !app.isMinimized)
+                  .map(app => (
+                    <AppWindow
+                      key={app.instanceId}
+                      app={{
+                        ...app,
+                        initialData: {
+                          ...app.initialData,
+                          refreshId,
+                          triggerRefresh,
+                        },
+                      }}
+                      onClose={() => closeApp(app.instanceId)}
+                      onMinimize={() => toggleMinimizeApp(app.instanceId)}
+                      onMaximize={() => toggleMaximizeApp(app.instanceId)}
+                      onFocus={() => focusApp(app.instanceId)}
+                      onDrag={updateAppPosition}
+                      onResize={updateAppSize}
+                      isActive={app.instanceId === activeAppInstanceId}
+                      desktopRef={desktopRef}
+                      onSetTitle={newTitle =>
+                        updateAppTitle(app.instanceId, newTitle)
+                      }
+                      onWallpaperChange={() => {}} // This is now handled by themes app
+                      openApp={openApp}
+                      clipboard={clipboard}
+                      handleCopy={handleCopy}
+                      handleCut={handleCut}
+                      handlePaste={handlePaste}
+                    />
+                  ))}
               </div>
 
               {isStartMenuOpen && (
@@ -138,11 +160,11 @@ const App: React.FC = () => {
                   if (instanceId) {
                     const app = openApps.find(a => a.instanceId === instanceId);
                     if (app?.isMinimized) {
-                        toggleMinimizeApp(instanceId);
+                      toggleMinimizeApp(instanceId);
                     } else if (activeAppInstanceId !== instanceId) {
-                        focusApp(instanceId);
+                      focusApp(instanceId);
                     } else {
-                        toggleMinimizeApp(instanceId);
+                      toggleMinimizeApp(instanceId);
                     }
                   } else {
                     openApp(appId);

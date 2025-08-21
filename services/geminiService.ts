@@ -1,4 +1,4 @@
-import { GoogleGenAI, GenerateContentResponse } from "@google/genai";
+import {GoogleGenAI, GenerateContentResponse} from '@google/genai';
 
 const API_URL = 'http://localhost:3001/api';
 
@@ -15,7 +15,7 @@ const getApiKey = async (): Promise<string | null> => {
     const data = await response.json();
     return data.apiKey;
   } catch (error) {
-    console.error("Could not fetch Gemini API key from the backend:", error);
+    console.error('Could not fetch Gemini API key from the backend:', error);
     return null;
   }
 };
@@ -24,32 +24,34 @@ const getApiKey = async (): Promise<string | null> => {
 const initializeAi = async () => {
   if (ai || isInitializing) return;
   isInitializing = true;
-  
+
   try {
     const apiKey = await getApiKey();
     if (apiKey) {
-      ai = new GoogleGenAI({ apiKey });
+      ai = new GoogleGenAI({apiKey});
     } else {
       console.warn(
-        "Gemini API key not found. Ensure the backend server is running and the API_KEY is set in the .env file. AI features will be disabled or return mock responses."
+        'Gemini API key not found. Ensure the backend server is running and the API_KEY is set in the .env file. AI features will be disabled or return mock responses.',
       );
     }
   } catch (error) {
-    console.error("Error initializing Gemini API:", error);
+    console.error('Error initializing Gemini API:', error);
   } finally {
     isInitializing = false;
   }
 };
 
-export const generateGeminiResponse = async (prompt: string): Promise<string> => {
+export const generateGeminiResponse = async (
+  prompt: string,
+): Promise<string> => {
   // Ensure the AI client is initialized before making a request
   if (!ai && !isInitializing) {
     await initializeAi();
   }
-  
+
   if (!ai) {
     await new Promise(resolve => setTimeout(resolve, 500)); // Simulate delay
-    return "Gemini API is not configured. Please ensure the backend server is running and the API_KEY environment variable is set.";
+    return 'Gemini API is not configured. Please ensure the backend server is running and the API_KEY environment variable is set.';
   }
 
   try {
@@ -59,10 +61,10 @@ export const generateGeminiResponse = async (prompt: string): Promise<string> =>
     });
     return response.text;
   } catch (error) {
-    console.error("Error calling Gemini API:", error);
+    console.error('Error calling Gemini API:', error);
     if (error instanceof Error) {
-        return `Error from Gemini: ${error.message}`;
+      return `Error from Gemini: ${error.message}`;
     }
-    return "An unknown error occurred while contacting Gemini.";
+    return 'An unknown error occurred while contacting Gemini.';
   }
 };

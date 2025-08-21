@@ -1,5 +1,5 @@
 const path = require('path');
-const { FS_ROOT } = require('./constants');
+const {FS_ROOT} = require('./constants');
 
 /**
  * Resolves a relative path to an absolute path within the project's root directory.
@@ -9,11 +9,13 @@ const { FS_ROOT } = require('./constants');
  * @throws {Error} If the path is outside the allowed root directory.
  */
 function resolvePath(relativePath) {
-    const fullPath = path.join(FS_ROOT, relativePath);
-    if (!fullPath.startsWith(FS_ROOT)) {
-        throw new Error('Access denied: Path is outside of the allowed root directory.');
-    }
-    return fullPath;
+  const fullPath = path.join(FS_ROOT, relativePath);
+  if (!fullPath.startsWith(FS_ROOT)) {
+    throw new Error(
+      'Access denied: Path is outside of the allowed root directory.',
+    );
+  }
+  return fullPath;
 }
 
-module.exports = { resolvePath };
+module.exports = {resolvePath};

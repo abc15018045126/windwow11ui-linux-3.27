@@ -1,11 +1,14 @@
-import { ReactNode } from 'react';
+import {ReactNode} from 'react';
 
 export interface IElectronAPI {
   // This is the only function left that is specific to the Electron environment.
   // All other filesystem/API key operations are now handled via a web API
   // to ensure consistency between the Electron app and a web browser client.
   launchExternalApp: (path: string, args?: string[]) => Promise<boolean>;
-  setProxyForSession: (partition: string, proxyConfig: { proxyRules: string }) => Promise<void>;
+  setProxyForSession: (
+    partition: string,
+    proxyConfig: {proxyRules: string},
+  ) => Promise<void>;
   clearProxyForSession: (partition: string) => Promise<void>;
 }
 
@@ -15,33 +18,32 @@ declare global {
   }
 }
 
-
 export interface AppIconProps {
   className?: string;
   isSmall?: boolean; // For smaller icon variants, e.g. in taskbar
 }
 
 export interface ProjectFile {
-    name: string;
-    path: string;
-    content: string;
+  name: string;
+  path: string;
+  content: string;
 }
 
 export interface FilesystemItem extends Partial<ProjectFile> {
-    name: string;
-    path: string;
-    type: 'file' | 'folder';
+  name: string;
+  path: string;
+  type: 'file' | 'folder';
 }
 
 export type ClipboardItem = {
-    item: FilesystemItem;
-    operation: 'copy' | 'cut';
+  item: FilesystemItem;
+  operation: 'copy' | 'cut';
 };
 
 export type AppComponentProps = {
   appInstanceId: string;
   onClose: () => void;
-  setTitle: (title: string) => void; 
+  setTitle: (title: string) => void;
   wallpaper?: string;
   onWallpaperChange?: (newWallpaper: string) => void;
   // Allow apps to open other apps
@@ -62,7 +64,7 @@ export interface AppDefinition {
   name: string;
   icon: string;
   component: AppComponentType;
-  defaultSize?: { width: number; height: number };
+  defaultSize?: {width: number; height: number};
   isPinnedToTaskbar?: boolean; // To show on taskbar by default
   isExternal?: boolean; // To launch as a separate Electron process
   externalPath?: string; // Path relative to app root for the external app
@@ -71,13 +73,13 @@ export interface AppDefinition {
 export interface OpenApp extends AppDefinition {
   instanceId: string;
   zIndex: number;
-  position: { x: number; y: number };
-  size: { width: number; height: number };
+  position: {x: number; y: number};
+  size: {width: number; height: number};
   isMinimized: boolean;
   isMaximized: boolean;
-  title: string; 
-  previousPosition?: { x: number; y: number }; // For restoring from maximized
-  previousSize?: { width: number; height: number }; // For restoring from maximized
+  title: string;
+  previousPosition?: {x: number; y: number}; // For restoring from maximized
+  previousSize?: {width: number; height: number}; // For restoring from maximized
   initialData?: any; // Data passed when the app is opened
 }
 
@@ -89,7 +91,7 @@ export interface ChatMessage {
 }
 
 export interface Theme {
-  id:string;
+  id: string;
   name: string;
   wallpaper: string;
   taskbar: {
