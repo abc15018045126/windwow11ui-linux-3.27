@@ -3,10 +3,19 @@ import {launchInternalApp} from './internal';
 import {launchSystemApp} from './system';
 import {AppDefinition} from '../types';
 
-// A more robust app management module would define its own types
-// and not depend on React hooks directly, but for this refactoring,
-// we keep the dependency signature from useWindowManager.
-type WindowManagerDeps = any; // Using 'any' for now to avoid duplicating the large type.
+import {OpenApp} from '../types';
+
+// This type defines the state and setters that the app launchers depend on.
+type WindowManagerDeps = {
+  openApps: OpenApp[];
+  setOpenApps: React.Dispatch<React.SetStateAction<OpenApp[]>>;
+  activeAppInstanceId: string | null;
+  setActiveAppInstanceId: React.Dispatch<React.SetStateAction<string | null>>;
+  nextZIndex: number;
+  setNextZIndex: React.Dispatch<React.SetStateAction<number>>;
+  desktopRef: React.RefObject<HTMLDivElement>;
+  getNextPosition: (appWidth: number, appHeight: number) => {x: number; y: number};
+};
 
 const SYSTEM_APP_IDS = ['fileExplorer', 'settings', 'appStore'];
 
