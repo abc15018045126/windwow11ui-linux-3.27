@@ -1,8 +1,9 @@
-import {useState, useCallback, useEffect} from 'react';
-import {OpenApp, AppDefinition} from '../types';
-import {TASKBAR_HEIGHT} from '../constants';
-import {getAppDefinitions} from '../../components/apps';
-import * as AppManager from '../app';
+import { useState, useCallback, useEffect } from 'react';
+import { OpenApp, AppDefinition } from '../types';
+import { TASKBAR_HEIGHT, DEFAULT_WINDOW_WIDTH, DEFAULT_WINDOW_HEIGHT } from '../constants';
+import { getAppDefinitions } from '../../components/apps';
+
+import {openApp as openAppInManager} from '../app';
 
 export const useWindowManager = (
   desktopRef: React.RefObject<HTMLDivElement>,
@@ -25,8 +26,6 @@ export const useWindowManager = (
     loadApps();
   }, []);
 
-  // This helper function was removed, but is still needed by toggleMaximizeApp.
-  // It is also needed by the app launchers, so we will pass it in the deps object.
   const getNextPosition = (appWidth: number, appHeight: number) => {
     const desktopWidth = desktopRef.current?.clientWidth || window.innerWidth;
     const desktopHeight =
@@ -58,7 +57,7 @@ export const useWindowManager = (
         desktopRef,
         getNextPosition,
       };
-      AppManager.openApp(appIdentifier, deps, appDefinitions, initialData);
+      openAppInManager(appIdentifier, deps, appDefinitions, initialData);
     },
     [
       appDefinitions,
@@ -66,10 +65,10 @@ export const useWindowManager = (
       openApps,
       activeAppInstanceId,
       desktopRef,
-      getNextPosition,
       setOpenApps,
       setActiveAppInstanceId,
       setNextZIndex,
+      getNextPosition,
     ],
   );
 
